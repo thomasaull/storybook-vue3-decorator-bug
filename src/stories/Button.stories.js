@@ -1,8 +1,36 @@
 import MyButton from "./Button.vue";
+import { h } from "vue";
 
 export default {
   title: "Example/Button",
   component: MyButton,
+
+  decorators: [
+    // MyButton does not show up in this case, it's gets rendered as:
+    // <mybutton label="Button from default decorator"></mybutton>
+    () => ({
+      components: {
+        MyButton,
+      },
+
+      template: `
+        <MyButton label="Button from default decorator"/>
+        <story/>
+      `,
+    }),
+    // As a workaround, this seems to work:
+    (storyFn) => {
+      // Call the `storyFn` to receive a component that Vue can render
+      const story = storyFn();
+      // Vue 3 "Functional" component as decorator
+      return () => {
+        return [
+          h(MyButton, { label: "Button from render function" }),
+          h(story),
+        ];
+      };
+    },
+  ],
 
   argTypes: {
     backgroundColor: { control: "color" },
